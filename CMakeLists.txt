@@ -7,6 +7,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(nlohmann_json REQUIRED)  # JSON library
 find_package(rclcpp REQUIRED)
 find_package(interfaces REQUIRED)
 find_package(common_package REQUIRED)
@@ -14,9 +15,7 @@ find_package(common_package REQUIRED)
 include_directories(include)
 
 add_executable(demo_node src/main.cpp)
-#target_include_directories(demo_node PRIVATE
-#        include)
-ament_target_dependencies(demo_node rclcpp interfaces common_package)
+ament_target_dependencies(demo_node rclcpp interfaces common_package nlohmann_json)
 
 install (TARGETS
   demo_node
