@@ -1,0 +1,77 @@
+name: Colcon Build, Test, Coverage and Autoformat
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - pre-release
+      - release
+
+  workflow_dispatch:
+
+jobs:
+  Build-test-autoformat:
+    runs-on: self-hosted
+
+    steps:
+
+    - name: Get the date
+      id: date
+      run: echo "date=$(date +'%F_%H-%M-%S')" >> $GITHUB_OUTPUT
+    
+    - name: Autopep8
+      uses: THI-Drone/action-autopep@main
+      with:
+        apply-changes: false
+        use-own-pep8-config: false
+
+    - name: Setup Docker Container 
+      run: | 
+        docker pull ros:humble
+        docker rm -f ros-container || true
+        docker run --name ros-container -i -d ros:humble bash
+
+
+    - name: Build and test
+      run: |
+        docker exec -i ros-container /bin/bash -c "apt-get update && apt-get install -y nlohmann-json3-dev && apt-get install -y python3-pip && pip install setuptools==58.2.0 && pip install pytest && rosdep update && pip install pytest coverage && pip install colcon-coveragepy-result && pip install pytest coverage pytest-cov"
+        docker exec -i ros-container /bin/bash -c "git clone --recursive --branch dev https://github.com/THI-Drone/thi-drone-ws.git"
+        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/demo_package_py && git checkout ${{ github.head_ref }}"
+        docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash"
+        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/ && rosdep fix-permissions && rosdep update && rosdep install --from-paths src --ignore-src -r -y"
+        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/demo_package_py && colcon build && colcon test --packages-select demo_package_py --pytest-args '--cov=.' '--cov-report=html' && colcon test-result --all && colcon coveragepy-result"
+        docker exec -i ros-container /bin/bash -c "cat thi-drone-ws/src/demo_package_py/log/latest_test/demo_package_py/stdout_stderr.log"
+        
+    - name: Copy coverage report from container to workspace
+      run: |
+        rm -rf ./coverage
+        rm -rf ./stdout_stderr.log
+        docker cp ros-container:/thi-drone-ws/src/demo_package_py/htmlcov ./coverage
+        docker cp ros-container:/thi-drone-ws/src/demo_package_py/log/latest_test/demo_package_py/stdout_stderr.log ./stdout_stderr.log
+
+    - name: PR comment
+      uses: thollander/actions-comment-pull-request@v2
+      with:
+        filePath: ./stdout_stderr.log
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@main
+      with:
+        name: coverage-report-${{ steps.date.outputs.date }}
+        path: ./coverage
+
+    - name: Copy logs from container to workspace
+      if: failure()
+      run: |
+        rm -rf ./log
+        docker cp ros-container:/thi-drone-ws/src/demo_package_py/log ./log
+    
+    - name: Upload build-logs
+      uses: actions/upload-artifact@main
+      if: failure()
+      with:
+        name: build-logs-${{ steps.date.outputs.date }}
+        path: ./log
+      
+
+
