@@ -34,20 +34,21 @@ jobs:
 
     - name: Build and test
       run: |
+      
         docker exec -i ros-container /bin/bash -c "apt-get update && apt-get install -y nlohmann-json3-dev && apt-get install -y python3-pip && pip install setuptools==58.2.0 && pip install pytest && rosdep update && pip install pytest coverage && pip install colcon-coveragepy-result && pip install pytest coverage pytest-cov"
         docker exec -i ros-container /bin/bash -c "git clone --recursive --branch dev https://github.com/THI-Drone/thi-drone-ws.git && git fetch --all"
-        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/demo_package_py && git checkout ${{ github.head_ref }}"
+        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/$(basename ${{github.repository}}) && git checkout ${{ github.head_ref }}"
         docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash"
         docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/ && rosdep fix-permissions && rosdep update && rosdep install --from-paths src --ignore-src -r -y"
-        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/demo_package_py && colcon build && colcon test --packages-select demo_package_py --pytest-args '--cov=.' '--cov-report=html' && colcon test-result --all && colcon coveragepy-result"
-        docker exec -i ros-container /bin/bash -c "cat thi-drone-ws/src/demo_package_py/log/latest_test/demo_package_py/stdout_stderr.log"
+        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/$(basename ${{github.repository}}) && colcon build && colcon test --packages-select $(basename ${{github.repository}}) --pytest-args '--cov=.' '--cov-report=html' && colcon test-result --all && colcon coveragepy-result"
+        docker exec -i ros-container /bin/bash -c "cat thi-drone-ws/src/$(basename ${{github.repository}})/log/latest_test/$(basename ${{github.repository}})/stdout_stderr.log"
         
     - name: Copy coverage report from container to workspace
       run: |
         rm -rf ./coverage
         rm -rf ./stdout_stderr.log
-        docker cp ros-container:/thi-drone-ws/src/demo_package_py/htmlcov ./coverage
-        docker cp ros-container:/thi-drone-ws/src/demo_package_py/log/latest_test/demo_package_py/stdout_stderr.log ./stdout_stderr.log
+        docker cp ros-container:/thi-drone-ws/src/$(basename ${{github.repository}})/htmlcov ./coverage
+        docker cp ros-container:/thi-drone-ws/src/$(basename ${{github.repository}})/log/latest_test/$(basename ${{github.repository}})/stdout_stderr.log ./stdout_stderr.log
 
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
@@ -64,7 +65,7 @@ jobs:
       if: failure()
       run: |
         rm -rf ./log
-        docker cp ros-container:/thi-drone-ws/src/demo_package_py/log ./log
+        docker cp ros-container:/thi-drone-ws/src/$(basename ${{github.repository}})/log ./log
     
     - name: Upload build-logs
       uses: actions/upload-artifact@main
