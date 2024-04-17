@@ -38,18 +38,18 @@ jobs:
         echo $REPONAME
         docker exec -i ros-container /bin/bash -c "apt-get update && apt-get install -y nlohmann-json3-dev && apt-get install -y python3-pip && pip install setuptools==58.2.0 && pip install pytest && rosdep update && pip install pytest coverage && pip install colcon-coveragepy-result && pip install pytest coverage pytest-cov"
         docker exec -i ros-container /bin/bash -c "git clone --recursive --branch dev https://github.com/THI-Drone/thi-drone-ws.git"
-        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/REPONAME && git fetch --all && git checkout ${{ github.head_ref }}"
+        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/$REPONAME && git fetch --all && git checkout ${{ github.head_ref }}"
         docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash"
         docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/ && rosdep fix-permissions && rosdep update && rosdep install --from-paths src --ignore-src -r -y"
-        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/REPONAME && colcon build && colcon test --packages-select REPONAME --pytest-args '--cov=.' '--cov-report=html' && colcon test-result --all && colcon coveragepy-result"
-        docker exec -i ros-container /bin/bash -c "cat thi-drone-ws/src/REPONAME/log/latest_test/REPONAME/stdout_stderr.log"
+        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/$REPONAME && colcon build && colcon test --packages-select $REPONAME --pytest-args '--cov=.' '--cov-report=html' && colcon test-result --all && colcon coveragepy-result"
+        docker exec -i ros-container /bin/bash -c "cat thi-drone-ws/src/$REPONAME/log/latest_test/$REPONAME/stdout_stderr.log"
         
     - name: Copy coverage report from container to workspace
       run: |
         rm -rf ./coverage
         rm -rf ./stdout_stderr.log
-        docker cp ros-container:/thi-drone-ws/src/REPONAME/htmlcov ./coverage
-        docker cp ros-container:/thi-drone-ws/src/REPONAME/log/latest_test/REPONAME/stdout_stderr.log ./stdout_stderr.log
+        docker cp ros-container:/thi-drone-ws/src/$REPONAME/htmlcov ./coverage
+        docker cp ros-container:/thi-drone-ws/src/$REPONAME/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log
 
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
@@ -66,7 +66,7 @@ jobs:
       if: failure()
       run: |
         rm -rf ./log
-        docker cp ros-container:/thi-drone-ws/src/REPONAME/log ./log
+        docker cp ros-container:/thi-drone-ws/src/$REPONAME/log ./log
     
     - name: Upload build-logs
       uses: actions/upload-artifact@main
