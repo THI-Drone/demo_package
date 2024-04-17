@@ -34,7 +34,7 @@ jobs:
 
     - name: Build and test
       run: |
-      
+        echo $(basename ${{github.repository}})
         docker exec -i ros-container /bin/bash -c "apt-get update && apt-get install -y nlohmann-json3-dev && apt-get install -y python3-pip && pip install setuptools==58.2.0 && pip install pytest && rosdep update && pip install pytest coverage && pip install colcon-coveragepy-result && pip install pytest coverage pytest-cov"
         docker exec -i ros-container /bin/bash -c "git clone --recursive --branch dev https://github.com/THI-Drone/thi-drone-ws.git && git fetch --all"
         docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/$(basename ${{github.repository}}) && git checkout ${{ github.head_ref }}"
