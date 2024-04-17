@@ -39,9 +39,8 @@ jobs:
         docker exec -i ros-container /bin/bash -c "apt-get update && apt-get install -y nlohmann-json3-dev && apt-get install -y python3-pip && pip install setuptools==58.2.0 && pip install pytest && rosdep update && pip install pytest coverage && pip install colcon-coveragepy-result && pip install pytest coverage pytest-cov && apt-get install ros-humble-ament-cmake"
         docker exec -i ros-container /bin/bash -c "git clone --recursive --branch dev https://github.com/THI-Drone/thi-drone-ws.git"
         docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/$REPONAME && git fetch --all && git checkout ${{ github.head_ref }}"
-        docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash"
         docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/ && rosdep fix-permissions && rosdep update && rosdep install --from-paths src --ignore-src -r -y"
-        docker exec -i ros-container /bin/bash -c "cd thi-drone-ws/src/$REPONAME && colcon build && colcon test --packages-select $REPONAME --pytest-args '--cov=.' '--cov-report=html' && colcon test-result --all && colcon coveragepy-result"
+        docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/src/$REPONAME && colcon build && colcon test --packages-select $REPONAME --pytest-args '--cov=.' '--cov-report=html' && colcon test-result --all && colcon coveragepy-result"
         docker exec -i ros-container /bin/bash -c "cat thi-drone-ws/src/$REPONAME/log/latest_test/$REPONAME/stdout_stderr.log"
         
     - name: Copy coverage report from container to workspace
