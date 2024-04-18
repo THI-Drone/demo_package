@@ -74,7 +74,7 @@ jobs:
         log_exists=$(docker exec ros-container test -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log && echo yes || echo no)
         if [ "$log_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log; fi
         
-        echo "{log_exists}={$log_exists}" >> $GITHUB_OUTPUT
+        echo "{log_exists}={"$log_exists"}" >> $GITHUB_OUTPUT
         echo $log_exists
 
     - run: echo ${{steps.copy-coverage.outputs.log_exists}}
