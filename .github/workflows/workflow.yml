@@ -11,15 +11,15 @@ on:
 
 jobs:
   format:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 2
-      - uses: purduesigbots/clang-format-action@1
-        with:
-          style: file
+
+      - name: clang-format style check
+        uses: THI-Drone/action-clang-format@main
 
       - name: Autopep8 style check
         uses: THI-Drone/action-autopep@main
@@ -64,7 +64,7 @@ jobs:
         REPONAME=$(basename ${{github.repository}})
         docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/ && rosdep fix-permissions && rosdep update && rosdep install --from-paths src --ignore-src -r -y"
         docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/ && colcon build --packages-up-to $REPONAME --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage' -DCMAKE_EXPORT_COMPILE_COMMANDS=O && colcon lcov-result --initial --packages-up-to $REPONAME && colcon test --packages-up-to $REPONAME --pytest-args '--cov=.' '--cov-report=html' && colcon lcov-result --packages-up-to $REPONAME && colcon test-result --all && colcon coveragepy-result"
-        docker exec ros-container test -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log && docker exec -i ros-container /bin/bash -c "cat thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log"
+        docker exec -i ros-container /bin/bash -c " if[-f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log];then cat thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log fi"
 
     - name: Copy coverage report from container to workspace
       run: |
