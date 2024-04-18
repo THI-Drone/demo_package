@@ -19,11 +19,20 @@ jobs:
       id: date
       run: echo "date=$(date +'%F_%H-%M-%S')" >> $GITHUB_OUTPUT
     
-    - name: Autopep8
+    - uses: actions/checkout@main
+
+    - name: Autopep8 style check
       uses: THI-Drone/action-autopep@main
       with:
         apply-changes: false
         use-own-pep8-config: false
+
+    - name: clang-format style check
+      uses: diegoferigo/gh-action-clang-format@main
+      id: format
+      with:
+        style: Google
+        fail_on_error: true
 
     - name: Setup Docker Container 
       run: | 
