@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  format:
+  Autoformat:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
@@ -18,7 +18,7 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 2
 
-      - name: clang-format style check
+      - name: Clang-format style check
         uses: THI-Drone/action-clang-format@main
 
       - name: Autopep8 style check
@@ -65,9 +65,9 @@ jobs:
         REPONAME=$(basename ${{github.repository}})
         rm -rf ./coverage
         rm -rf ./stdout_stderr.log
-        if [ docker exec ros-container test -d /thi-drone-ws/src/$REPONAME/htmlcov ]; then docker cp ros-container:/thi-drone-ws/src/$REPONAME/htmlcov ./coverage fi"
-        if [ docker exec ros-container test -d /thi-drone-ws/lcov ]; then docker cp ros-container:/thi-drone-ws/lcov ./coveragee fi"
-        if [ docker exec ros-container test -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ]; then docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log fi"
+        if [ docker exec ros-container test -d /thi-drone-ws/src/$REPONAME/htmlcov ]; then docker cp ros-container:/thi-drone-ws/src/$REPONAME/htmlcov ./coverage fi
+        if [ docker exec ros-container test -d /thi-drone-ws/lcov ]; then docker cp ros-container:/thi-drone-ws/lcov ./coveragee fi
+        if [ docker exec ros-container test -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ]; then docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log fi
 
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
@@ -85,7 +85,7 @@ jobs:
       run: |
         REPONAME=$(basename ${{github.repository}})
         rm -rf ./log
-        docker cp ros-container:/thi-drone-ws/src/$REPONAME/log ./log
+        docker cp ros-container:/thi-drone-ws/log ./log
     
     - name: Upload build-logs
       uses: actions/upload-artifact@main
