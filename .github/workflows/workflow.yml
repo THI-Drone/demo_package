@@ -19,6 +19,9 @@ jobs:
       id: date
       run: echo "date=$(date +'%F_%H-%M-%S')" >> $GITHUB_OUTPUT
 
+    - name: Checkout repository
+      uses: actions/checkout@main
+      
     - name: Autopep8 style check
       uses: THI-Drone/action-autopep@main
       with:
