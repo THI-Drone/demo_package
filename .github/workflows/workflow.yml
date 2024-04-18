@@ -72,10 +72,9 @@ jobs:
         if [ "$lcov_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/lcov ./coverage; fi
 
         log_exists=$(docker exec ros-container test -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log && echo yes || echo no)
-        if [ "$log_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log; else echo "" || ./stdout_stderr.log fi
+        if [ "$log_exists" == "yes" ]; then echo "{log_exists}={'yes'}" >> $GITHUB_OUTPUT && docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log; else echo "{log_exists}={'no'}" >> $GITHUB_OUTPUT fi
         
-        echo "{log_exists}={$log_exists}" >> $GITHUB_OUTPUT
-
+      
     - run: echo steps.copy-coverage.outputs.log_exists
 
     - name: PR comment
