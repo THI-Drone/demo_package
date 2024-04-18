@@ -21,8 +21,7 @@ include_directories(include)
 add_executable(demo_node src/main.cpp)
 ament_target_dependencies(demo_node rclcpp interfaces common_package nlohmann_json)
 
-install (TARGETS
-  demo_node
+install(TARGETS demo_node
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
