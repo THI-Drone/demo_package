@@ -28,11 +28,10 @@ jobs:
         use-own-pep8-config: false
 
     - name: clang-format style check
-      uses: diegoferigo/gh-action-clang-format@main
-      id: format
+      uses: THI-Drone/action-clang-format@main
       with:
-        style: Google
-        fail_on_error: true
+        apply-changes: false
+
 
     - name: Setup Docker Container 
       run: | 
