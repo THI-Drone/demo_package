@@ -79,7 +79,7 @@ jobs:
 
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
-      if: ${{steps.copy-coverage.outputs.log_exists}} == "yes"
+      if: (${{steps.copy-coverage.outputs.log_exists}} == "yes")
       with:
         filePath: ./stdout_stderr.log
 
