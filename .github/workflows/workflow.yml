@@ -77,6 +77,8 @@ jobs:
         echo "{log_exists}={$log_exists}" >> $GITHUB_OUTPUT
         echo $log_exists
 
+    - run: echo ${{steps.copy-coverage.outputs.log_exists}}
+
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
       if: ("${{steps.copy-coverage.outputs.log_exists}}" == "yes")
