@@ -19,19 +19,6 @@ jobs:
       id: date
       run: echo "date=$(date +'%F_%H-%M-%S')" >> $GITHUB_OUTPUT
 
-    - name: Checkout repository
-      uses: actions/checkout@main
-      
-    - name: Autopep8 style check
-      uses: THI-Drone/action-autopep@main
-      with:
-        apply-changes: false
-        use-own-pep8-config: false
-
-    - name: clang-format style check
-      uses: THI-Drone/action-clang-format@main
-
-
     - name: Setup Docker Container 
       run: | 
         docker pull ros:humble
@@ -64,6 +51,18 @@ jobs:
         docker exec ros-container test -d /thi-drone-ws/src/$REPONAME/htmlcov && docker cp ros-container:/thi-drone-ws/src/$REPONAME/htmlcov ./coverage
         docker exec ros-container test -d /thi-drone-ws/lcov && docker cp ros-container:/thi-drone-ws/lcov ./coverage
         docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log
+
+    - name: Checkout repository
+      uses: actions/checkout@main
+      
+    - name: Autopep8 style check
+      uses: THI-Drone/action-autopep@main
+      with:
+        apply-changes: false
+        use-own-pep8-config: false
+
+    - name: clang-format style check
+      uses: THI-Drone/action-clang-format@main
 
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
