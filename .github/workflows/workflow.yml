@@ -50,7 +50,6 @@ jobs:
         docker exec -i ros-container /bin/bash -c "git clone --recursive --branch dev https://github.com/THI-Drone/thi-drone-ws.git && cd thi-drone-ws && git submodule foreach git checkout dev && git submodule foreach git pull origin dev"
         docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/src/$REPONAME && git fetch --all && git checkout ${{ github.head_ref }}"
         
-
     - name: Build and test
       run: |
         REPONAME=$(basename ${{github.repository}})
@@ -74,8 +73,6 @@ jobs:
         log_exists=$(docker exec ros-container test -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log && echo yes || echo no)
         if [ "$log_exists" == "yes" ]; then echo "{log_exists}={'yes'}" >> $GITHUB_OUTPUT && docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log; else echo "{log_exists}={'no'}" >> $GITHUB_OUTPUT; fi
         
-      
-    - run: echo steps.copy-coverage.outputs.log_exists
 
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
