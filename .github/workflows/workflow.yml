@@ -30,7 +30,8 @@ jobs:
     - name: clang-format style check
       uses: THI-Drone/action-clang-format@main
       with:
-        apply-changes: true
+        commit: true
+        commit-user-name: clang-formatter
 
 
     - name: Setup Docker Container 
