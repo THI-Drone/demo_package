@@ -1,4 +1,4 @@
-name: Colcon Build, Test, Coverage and Autoformat  C++
+name: Colcon Build, Test, Coverage and Autoformat
 
 on:
   pull_request:
