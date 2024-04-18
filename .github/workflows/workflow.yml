@@ -75,6 +75,7 @@ jobs:
         if [ "$log_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log; fi
         
         echo "{log_exists}={$log_exists}" >> $GITHUB_OUTPUT
+        echo $log_exists
 
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
