@@ -3,7 +3,7 @@
 /**
  * @brief A class that represents a minimal node.
  */
-class MinimalPublisher : public CommonNode
+class MinimalPublisher : public common_lib::CommonNode
 {
 public:
     /**
