@@ -59,11 +59,12 @@ jobs:
         docker exec -i ros-container /bin/bash -c " if [ -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ]; then cat /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log; fi"
 
     - name: Copy coverage report from container to workspace
+      id: copy-coverage
       run: |
         REPONAME=$(basename ${{github.repository}})
         rm -rf ./coverage
         rm -rf ./stdout_stderr.log
-        
+
         htmlcov_exists=$(docker exec ros-container test -d /thi-drone-ws/src/$REPONAME/htmlcov && echo yes || echo no)
         if [ "$htmlcov_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/src/$REPONAME/htmlcov ./coverage; fi
 
@@ -72,9 +73,12 @@ jobs:
 
         log_exists=$(docker exec ros-container test -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log && echo yes || echo no)
         if [ "$log_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log; fi
+        
+        echo "{log_exists}={$log_exists}" >> $GITHUB_OUTPUT
 
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
+      if: ${{steps.copy-coverage.outputs.log_exists}} == "yes"
       with:
         filePath: ./stdout_stderr.log
 
