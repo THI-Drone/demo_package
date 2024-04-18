@@ -47,8 +47,7 @@ jobs:
       run: |
         rm -rf ./coverage
         rm -rf ./stdout_stderr.log
-        docker exec ros-container test -d /thi-drone-ws/htmlcov && \
-          docker cp ros-container:/thi-drone-ws/htmlcov ./coverage
+        docker exec ros-container test -d /thi-drone-ws/htmlcov && docker cp ros-container:/thi-drone-ws/htmlcov ./coverage
         docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log
 
     - name: PR comment
