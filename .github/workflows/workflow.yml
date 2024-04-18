@@ -45,6 +45,8 @@ jobs:
         
     - name: Copy coverage report from container to workspace
       run: |
+        REPONAME=$(basename ${{github.repository}})
+        echo $REPONAME
         rm -rf ./coverage
         rm -rf ./stdout_stderr.log
         docker exec ros-container test -d /thi-drone-ws/htmlcov && docker cp ros-container:/thi-drone-ws/htmlcov ./coverage
