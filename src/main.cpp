@@ -11,7 +11,7 @@ public:
      *
      * @param id The unique name for the node.
      */
-    MinimalPublisher(char *id) : CommonNode(id)
+    MinimalPublisher(std::string id) : CommonNode(id)
     {
     }
 };
