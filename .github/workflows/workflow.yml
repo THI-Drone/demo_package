@@ -87,7 +87,7 @@ jobs:
         docker exec -i ros-container /bin/bash -c "ls -la /thi-drone-ws/log/latest_test"
         docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/ && colcon test-result --all && colcon coveragepy-result"
         docker exec -i ros-container /bin/bash -c " if [ -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ]; then cat /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log; fi"
-        docker exec -i ros-container /bin/bash -c "cd /thi-drone-ws/ lcov --list coverage.info" > coverage_output
+        docker exec -i ros-container /bin/bash -c "cd /thi-drone-ws/ && lcov --list coverage.info" > coverage_output
 
     - name: Copy coverage report from container to workspace
       id: copy-coverage
