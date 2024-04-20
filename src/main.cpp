@@ -19,3 +19,7 @@ int main(int argc, char* argv[]) {
     rclcpp::shutdown();
     return 0;
 }
+
+char * exampleFunction() {
+    return "This is an example function.";
+}
