@@ -20,4 +20,4 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-char* exampleFunction() { return "This is an example function."; }
+const char* exampleFunction() { return "This is an example function."; }
