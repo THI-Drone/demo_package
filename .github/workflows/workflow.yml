@@ -26,6 +26,7 @@ jobs:
 
 
   Build-and_test:
+    needs: Autoformat
     runs-on: self-hosted
 
     steps:

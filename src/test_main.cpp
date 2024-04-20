@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
+
 #include "main.hpp"
 
 // Test fixture class
 class ExampleTest : public ::testing::Test {
-protected:
+   protected:
     void testCapitalize(int input) {
         char expected[32] = "This is an example function.";
         char result[32] = exampleFunction(input);
