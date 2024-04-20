@@ -37,9 +37,36 @@ jobs:
 
     - name: Setup Docker Container 
       run: | 
-        docker pull ros:humble
-        docker rm -f ros-container || true
-        docker run --name ros-container -i -d ros:humble bash
+        CONTAINER_NAME="ros-container"
+        IMAGE="ros:humble"
+        OLD_ID=$(docker inspect --format "{{.Id}}" $IMAGE)
+        docker pull $IMAGE
+        NEW_ID=$(docker inspect --format "{{.Id}}" $IMAGE)
+        
+        if [ "$OLD_ID" != "$NEW_ID" ]; then
+          echo "update container"
+          docker stop $CONTAINER_NAME || true
+          docker rm $CONTAINER_NAME || true
+          docker run --name $CONTAINER_NAME -i -d $IMAGE bash
+        else
+          echo "use old container"
+          CONTAINER_ID=$(docker ps -a -q --filter name="^/${CONTAINER_NAME}$")
+
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "run new container"
+            docker run --name $CONTAINER_NAME  -i -d $IMAGE bash
+          else
+            RUNNING_CONTAINER_ID=$(docker ps -q --filter name="^/${CONTAINER_NAME}$")
+
+            if [ -z "$RUNNING_CONTAINER_ID" ]; then
+                docker start $CONTAINER_NAME
+                docker exec -i $CONTAINER_NAME /bin/bash -c "rm -rf /thi-drone-ws/"
+            else
+                echo "Container $CONTAINER_NAME is already running."
+                docker exec -i $CONTAINER_NAME /bin/bash -c "rm -rf /thi-drone-ws/"
+            fi
+          fi
+        fi
 
     - name: install dependencies
       run: |
@@ -90,7 +117,7 @@ jobs:
         path: ./coverage
 
     - name: Copy logs from container to workspace
-      if: failure()
+      if: always()
       run: |
         REPONAME=$(basename ${{github.repository}})
         rm -rf ./log
@@ -98,7 +125,7 @@ jobs:
     
     - name: Upload build-logs
       uses: actions/upload-artifact@main
-      if: failure()
+      if: always()
       with:
         name: build-logs-${{ steps.date.outputs.date }}
         path: ./log
