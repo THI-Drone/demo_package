@@ -73,7 +73,7 @@ jobs:
         if [ "$INSTALL_DEPENDENCIES" = true ]; then
           docker exec -i $CONTAINER_NAME /bin/bash -c "apt-get update && apt-get install -y nlohmann-json3-dev && apt-get install -y python3-pip && pip install setuptools==58.2.0 && pip install pytest && rosdep update && pip install coverage && pip install colcon-coveragepy-result && pip install pytest-cov && apt-get install ros-humble-ament-cmake -y && apt-get install ros-humble-ament-cmake-clang-format -y && apt-get install ros-humble-ament-cmake-cppcheck -y && apt-get install ros-humble-ament-cmake-cpplint -y && apt-get install ros-humble-ament-cmake-flake8 -y && apt-get install ros-humble-ament-cmake-lint-cmake -y && apt-get install ros-humble-ament-cmake-pep257 -y && apt-get install gcc lcov -y && apt-get install python3-colcon-lcov-result && apt-get install lcov"
         fi
-        apt-get install lcov
+        docker exec -i $CONTAINER_NAME /bin/bash -c "apt-get install lcov"
 
     - name: Clone repository
       run: |
