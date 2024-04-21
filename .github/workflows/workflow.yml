@@ -91,7 +91,8 @@ jobs:
               coverage report; \
           fi" > coverage_output
         docker exec -i ros-container /bin/bash -c "cd /thi-drone-ws/lcov/ && lcov --list ./total_coverage.info" >> coverage_output
-        echo -e "`\n$(cat coverage_output)\n`" > coverage_output
+        temp_data=$(cat coverage_output)
+        echo -e "`\n${temp_data}\n`" > coverage_output
 
     - name: Copy coverage report from container to workspace
       id: copy-coverage
