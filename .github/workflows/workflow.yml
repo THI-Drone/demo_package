@@ -42,12 +42,14 @@ jobs:
         OLD_ID=$(docker inspect --format "{{.Id}}" $IMAGE)
         docker pull $IMAGE
         NEW_ID=$(docker inspect --format "{{.Id}}" $IMAGE)
+        INSTALL_DEPENDENCIES=false
         
         if [ "$OLD_ID" != "$NEW_ID" ]; then
           echo "update container"
           docker stop $CONTAINER_NAME || true
           docker rm $CONTAINER_NAME || true
           docker run --name $CONTAINER_NAME -i -d $IMAGE bash
+          INSTALL_DEPENDENCIES=true
         else
           echo "use old container"
           CONTAINER_ID=$(docker ps -a -q --filter name="^/${CONTAINER_NAME}$")
@@ -55,6 +57,7 @@ jobs:
           if [ -z "$CONTAINER_ID" ]; then
             echo "run new container"
             docker run --name $CONTAINER_NAME  -i -d $IMAGE bash
+            INSTALL_DEPENDENCIES=true
           else
             RUNNING_CONTAINER_ID=$(docker ps -q --filter name="^/${CONTAINER_NAME}$")
 
@@ -67,10 +70,9 @@ jobs:
             fi
           fi
         fi
-
-    - name: install dependencies
-      run: |
-        docker exec -i ros-container /bin/bash -c "apt-get update && apt-get install -y nlohmann-json3-dev && apt-get install -y python3-pip && pip install setuptools==58.2.0 && pip install pytest && rosdep update && pip install coverage && pip install colcon-coveragepy-result && pip install pytest-cov && apt-get install ros-humble-ament-cmake -y && apt-get install ros-humble-ament-cmake-clang-format -y && apt-get install ros-humble-ament-cmake-cppcheck -y && apt-get install ros-humble-ament-cmake-cpplint -y && apt-get install ros-humble-ament-cmake-flake8 -y && apt-get install ros-humble-ament-cmake-lint-cmake -y && apt-get install ros-humble-ament-cmake-pep257 -y && apt-get install gcc lcov -y && apt-get install python3-colcon-lcov-result"
+        if [ "$INSTALL_DEPENDENCIES" = true ]; then
+          docker exec -i $CONTAINER_NAME /bin/bash -c "apt-get update && apt-get install -y nlohmann-json3-dev && apt-get install -y python3-pip && pip install setuptools==58.2.0 && pip install pytest && rosdep update && pip install coverage && pip install colcon-coveragepy-result && pip install pytest-cov && apt-get install ros-humble-ament-cmake -y && apt-get install ros-humble-ament-cmake-clang-format -y && apt-get install ros-humble-ament-cmake-cppcheck -y && apt-get install ros-humble-ament-cmake-cpplint -y && apt-get install ros-humble-ament-cmake-flake8 -y && apt-get install ros-humble-ament-cmake-lint-cmake -y && apt-get install ros-humble-ament-cmake-pep257 -y && apt-get install gcc lcov -y && apt-get install python3-colcon-lcov-result"
+        fi
 
     - name: Clone repository
       run: |
