@@ -92,6 +92,7 @@ jobs:
       id: copy-coverage
       run: |
         REPONAME=$(basename ${{github.repository}})
+        rm -rf ./coverage_output
         rm -rf ./coverage_html
 
         htmlcov_exists=$(docker exec ros-container test -d /thi-drone-ws/src/$REPONAME/htmlcov && echo yes || echo no)
@@ -102,6 +103,7 @@ jobs:
         
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
+      if: always()
       with:
         filePath: ./coverage_output
 
@@ -116,7 +118,7 @@ jobs:
       run: |
         REPONAME=$(basename ${{github.repository}})
         rm -rf ./log
-        docker cp ros-container:/ ./log
+        docker cp ros-container:/thi-drone-ws ./log
     
     - name: Upload build-logs
       uses: actions/upload-artifact@main
