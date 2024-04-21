@@ -82,40 +82,33 @@ jobs:
       run: |
         REPONAME=$(basename ${{github.repository}})
         docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/ && rosdep fix-permissions && rosdep update && rosdep install --from-paths src --ignore-src -r -y"
-        docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/ && colcon build --packages-up-to $REPONAME --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage' -DCMAKE_CXX_FLAGS='--coverage' -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && colcon lcov-result --initial --packages-up-to $REPONAME --directory src && colcon test --packages-up-to $REPONAME --pytest-args '--cov=.' '--cov-report=html' --directory src && colcon lcov-result --packages-up-to $REPONAME --directory src"
-        docker exec -i ros-container /bin/bash -c " if [ -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ]; then cat /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log; fi"
+        docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/ && colcon build --packages-up-to $REPONAME --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage' -DCMAKE_CXX_FLAGS='--coverage' -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && colcon lcov-result --initial --packages-up-to $REPONAME && colcon test --packages-up-to $REPONAME --pytest-args '--cov=.' '--cov-report=html' && colcon lcov-result --paths ./src/$REPONAME"
         docker exec -i ros-container /bin/bash -c "ls -la /thi-drone-ws/log/latest_test"
-        docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/ && colcon test-result --all && colcon coveragepy-result"
-        docker exec -i ros-container /bin/bash -c " if [ -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ]; then cat /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log; fi"
-        docker exec -i ros-container /bin/bash -c "cd /thi-drone-ws/ && lcov --list ./lcov/total_coverage.info" > coverage_output
+        docker exec -i ros-container /bin/bash -c "cd /thi-drone-ws/src/$REPONAME && coverage report" > coverage_output
+        docker exec -i ros-container /bin/bash -c "cd /thi-drone-ws/ && lcov --list ./lcov/total_coverage.info" >> coverage_output
 
     - name: Copy coverage report from container to workspace
       id: copy-coverage
       run: |
         REPONAME=$(basename ${{github.repository}})
-        rm -rf ./coverage
-        rm -rf ./stdout_stderr.log
+        rm -rf ./coverage_html
 
         htmlcov_exists=$(docker exec ros-container test -d /thi-drone-ws/src/$REPONAME/htmlcov && echo yes || echo no)
-        if [ "$htmlcov_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/src/$REPONAME/htmlcov ./coverage; fi
+        if [ "$htmlcov_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/src/$REPONAME/htmlcov ./coverage_html; fi
 
         lcov_exists=$(docker exec ros-container test -d /thi-drone-ws/lcov && echo yes || echo no)
-        if [ "$lcov_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/lcov ./coverage; fi
-
-        log_exists=$(docker exec ros-container test -f /thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log && echo yes || echo no)
-        if [ "$log_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/log/latest_test/$REPONAME/stdout_stderr.log ./stdout_stderr.log; else cat coverage_output > ./stdout_stderr.log; fi
+        if [ "$lcov_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/lcov ./coverage_html; fi
         
-
     - name: PR comment
       uses: thollander/actions-comment-pull-request@v2
       with:
-        filePath: ./stdout_stderr.log
+        filePath: ./coverage_output
 
     - name: Upload coverage report
       uses: actions/upload-artifact@main
       with:
         name: coverage-report-${{ steps.date.outputs.date }}
-        path: ./coverage
+        path: ./coverage_html
 
     - name: Copy logs from container to workspace
       if: always()
