@@ -86,18 +86,18 @@ jobs:
         docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/ && rosdep fix-permissions && rosdep update && rosdep install --from-paths src --ignore-src -r -y"
         docker exec -i ros-container /bin/bash -c "source /opt/ros/humble/setup.bash && cd thi-drone-ws/ && colcon build --packages-up-to $REPONAME --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage' -DCMAKE_CXX_FLAGS='--coverage' -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && colcon lcov-result --initial --packages-up-to $REPONAME && colcon test --packages-up-to $REPONAME --pytest-args '--cov=.' '--cov-report=html' && colcon lcov-result --paths ./src/$REPONAME"
 
-        docker exec -i ros-container ls /thi-drone-ws/
-        docker exec -i ros-container /bin/bash -c "cd /thi-drone-ws/lcov/ && lcov --list ./total_coverage.info > /thi-drone-ws/lcov/debug_output"
+        docker exec -i ros-container /bin/bash -c "cd /thi-drone-ws/src/$REPONAME && \
+          if [ -f .coverage ]; then \
+              coverage report; \
+          fi" > coverage_output
+        docker exec -i ros-container /bin/bash -c "cd /thi-drone-ws/lcov/ && lcov --list ./total_coverage.info" >> coverage_output
 
 
     - name: Copy coverage report from container to workspace
       id: copy-coverage
-      if: always()
       run: |
         REPONAME=$(basename ${{github.repository}})
         rm -rf ./coverage_html
-
-        docker exec -i ros-container /bin/bash -c "cat /thi-drone-ws/lcov/debug_output"
 
         htmlcov_exists=$(docker exec ros-container test -d /thi-drone-ws/src/$REPONAME/htmlcov && echo yes || echo no)
         if [ "$htmlcov_exists" == "yes" ]; then docker cp ros-container:/thi-drone-ws/src/$REPONAME/htmlcov ./coverage_html; fi
