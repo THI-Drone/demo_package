@@ -19,5 +19,3 @@ int main(int argc, char *argv[]) {
   rclcpp::shutdown();
   return 0;
 }
-
-int return_one() { return 1; }
