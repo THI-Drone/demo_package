@@ -10,8 +10,5 @@ on:
   workflow_dispatch:
 
 jobs:
-  Autoformat:
-    runs-on: self-hosted
-    steps:
-    - name: Autoformat and Test
-      uses: THI-Drone/workflow/.github/workflows/workflow.yml@main
+  Autoformat-and-Test:
+    uses: THI-Drone/workflow/.github/workflows/workflow.yml@main
