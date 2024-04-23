@@ -13,6 +13,5 @@ jobs:
   Autoformat:
     runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v2
     - name: Autoformat and Test
       uses: THI-Drone/workflow/.github/workflows/workflow.yml@main
